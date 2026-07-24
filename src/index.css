@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+
+  --color-ink: #0a0c10;
+  --color-surface: #12151b;
+  --color-surface-raised: #171b23;
+  --color-surface-hover: #1c212b;
+  --color-line: #232733;
+  --color-line-soft: #1a1e28;
+  --color-fog: #8890a2;
+  --color-fog-dim: #5b6272;
+  --color-paper: #e8eaf0;
+  --color-signal: #5b8def;
+  --color-signal-dim: #3a5789;
+  --color-cyan: #47c9d6;
+  --color-amber: #e0a458;
+  --color-rose: #e0637a;
+  --color-mint: #5fc98a;
+}
+
+* {
+  border-color: var(--color-line);
+}
+
+html, body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-signal-dim);
+  color: var(--color-paper);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 8px; border: 2px solid var(--color-surface); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-fog-dim); }
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-scan { animation: scan 1.6s ease-in-out infinite; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
