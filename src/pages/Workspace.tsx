@@ -1,108 +1,179 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Card } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { Input, Textarea } from "../components/ui/Input";
 import {
   FolderKanban,
   Plus,
   Trash2,
-  FolderOpen,
-  Clock,
-  CheckCircle2,
+  FilePlus2,
+  CheckSquare,
 } from "lucide-react";
 
-interface Case {
+interface Task {
   id: string;
-  name: string;
-  status: "Active" | "Completed";
-  evidence: number;
-  notes: number;
-  updated: string;
+  text: string;
+  done: boolean;
 }
 
-const initialCases: Case[] = [
-  {
-    id: "1",
-    name: "Black Vault Investigation",
-    status: "Active",
-    evidence: 12,
-    notes: 5,
-    updated: "2 min ago",
-  },
-  {
-    id: "2",
-    name: "Malware Sample",
-    status: "Completed",
-    evidence: 21,
-    notes: 11,
-    updated: "Yesterday",
-  },
-];
+interface WorkspaceCase {
+  id: string;
+  title: string;
+  description: string;
+  evidence: string[];
+  tasks: Task[];
+}
+
+const STORAGE_KEY = "cyber-workspace";
 
 export function Workspace() {
-  const [cases, setCases] = useState(initialCases);
-  const [selected, setSelected] = useState(initialCases[0].id);
+  const [cases, setCases] = useState<WorkspaceCase[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const activeCase = cases.find((c) => c.id === selected);
+  const [newEvidence, setNewEvidence] = useState("");
+  const [newTask, setNewTask] = useState("");
+
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (saved) {
+      const parsed: WorkspaceCase[] = JSON.parse(saved);
+      setCases(parsed);
+
+      if (parsed.length) setSelected(parsed[0].id);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
+  }, [cases]);
+
+  const activeCase = useMemo(
+    () => cases.find((c) => c.id === selected) ?? null,
+    [cases, selected]
+  );
+
+  function updateCase(update: Partial<WorkspaceCase>) {
+    if (!selected) return;
+
+    setCases((prev) =>
+      prev.map((c) =>
+        c.id === selected ? { ...c, ...update } : c
+      )
+    );
+  }
 
   function createCase() {
-    const name = prompt("Case name");
-
-    if (!name?.trim()) return;
-
-    const newCase: Case = {
+    const c: WorkspaceCase = {
       id: crypto.randomUUID(),
-      name,
-      status: "Active",
-      evidence: 0,
-      notes: 0,
-      updated: "Just now",
+      title: "New Investigation",
+      description: "",
+      evidence: [],
+      tasks: [],
     };
 
-    setCases((prev) => [newCase, ...prev]);
-    setSelected(newCase.id);
+    setCases((p) => [c, ...p]);
+    setSelected(c.id);
   }
 
   function deleteCase(id: string) {
     const remaining = cases.filter((c) => c.id !== id);
-
     setCases(remaining);
 
     if (selected === id) {
-      setSelected(remaining[0]?.id ?? "");
+      setSelected(remaining[0]?.id ?? null);
     }
   }
 
+  function addEvidence() {
+    if (!activeCase || !newEvidence.trim()) return;
+
+    updateCase({
+      evidence: [...activeCase.evidence, newEvidence.trim()],
+    });
+
+    setNewEvidence("");
+  }
+
+  function removeEvidence(index: number) {
+    if (!activeCase) return;
+
+    updateCase({
+      evidence: activeCase.evidence.filter((_, i) => i !== index),
+    });
+  }
+
+  function addTask() {
+    if (!activeCase || !newTask.trim()) return;
+
+    updateCase({
+      tasks: [
+        ...activeCase.tasks,
+        {
+          id: crypto.randomUUID(),
+          text: newTask.trim(),
+          done: false,
+        },
+      ],
+    });
+
+    setNewTask("");
+  }
+
+  function toggleTask(id: string) {
+    if (!activeCase) return;
+
+    updateCase({
+      tasks: activeCase.tasks.map((t) =>
+        t.id === id ? { ...t, done: !t.done } : t
+      ),
+    });
+  }
+
+  function deleteTask(id: string) {
+    if (!activeCase) return;
+
+    updateCase({
+      tasks: activeCase.tasks.filter((t) => t.id !== id),
+    });
+  }
+
   return (
-    <div className="p-6 h-full flex gap-6">
+    <div className="p-6 grid grid-cols-[280px_1fr] gap-6 h-[calc(100vh-4rem)]">
 
       {/* Sidebar */}
 
-      <div className="w-80 rounded-xl border border-line bg-panel flex flex-col">
+      <Card className="flex flex-col overflow-hidden">
 
         <div className="flex items-center justify-between p-4 border-b border-line">
 
           <div className="flex items-center gap-2">
             <FolderKanban size={18} />
-            <h2 className="font-semibold">
-              Cases
-            </h2>
+            <span className="font-semibold">
+              Workspace
+            </span>
           </div>
 
-          <button
-            onClick={createCase}
-            className="p-2 rounded hover:bg-line"
-          >
-            <Plus size={16} />
-          </button>
+          <Button size="sm" onClick={createCase}>
+            <Plus size={14}/>
+          </Button>
 
         </div>
 
-        <div className="overflow-auto">
+        <div className="flex-1 overflow-auto">
 
-          {cases.map((item) => (
+          {cases.length === 0 && (
+            <div className="p-4 text-sm text-fog">
+              No investigations yet.
+            </div>
+          )}
+
+          {cases.map((c) => (
             <div
-              key={item.id}
-              onClick={() => setSelected(item.id)}
-              className={`p-4 border-b border-line cursor-pointer transition ${
-                selected === item.id
+              key={c.id}
+              onClick={() => setSelected(c.id)}
+              className={`p-4 border-b border-line cursor-pointer ${
+                selected === c.id
                   ? "bg-signal/10"
                   : "hover:bg-line/40"
               }`}
@@ -112,11 +183,11 @@ export function Workspace() {
                 <div>
 
                   <div className="font-medium">
-                    {item.name}
+                    {c.title}
                   </div>
 
-                  <div className="text-xs text-fog mt-1">
-                    {item.status}
+                  <div className="text-xs text-fog">
+                    {c.evidence.length} evidence • {c.tasks.length} tasks
                   </div>
 
                 </div>
@@ -124,11 +195,13 @@ export function Workspace() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteCase(item.id);
+                    deleteCase(c.id);
                   }}
-                  className="text-red-400 hover:text-red-300"
                 >
-                  <Trash2 size={14} />
+                  <Trash2
+                    size={14}
+                    className="text-red-400"
+                  />
                 </button>
 
               </div>
@@ -138,131 +211,182 @@ export function Workspace() {
 
         </div>
 
-      </div>
+      </Card>
 
       {/* Main */}
 
-      <div className="flex-1 rounded-xl border border-line bg-panel p-6">
+      <Card className="p-6 overflow-auto">
 
-        {activeCase ? (
-          <>
-            <div className="flex justify-between items-start">
-
-              <div>
-
-                <h1 className="text-3xl font-bold">
-                  {activeCase.name}
-                </h1>
-
-                <div className="flex gap-6 mt-3 text-sm text-fog">
-
-                  <span>
-                    📁 {activeCase.evidence} Evidence
-                  </span>
-
-                  <span>
-                    📝 {activeCase.notes} Notes
-                  </span>
-
-                  <span className="flex items-center gap-1">
-                    <Clock size={14} />
-                    {activeCase.updated}
-                  </span>
-
-                </div>
-
-              </div>
-
-              <FolderOpen size={42} />
-
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-4 mt-8">
-
-              <div className="rounded-lg border border-line p-4">
-                <h3 className="font-semibold mb-3">
-                  Investigation Checklist
-                </h3>
-
-                <div className="space-y-2 text-sm">
-
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 size={16} className="text-green-500" />
-                    Evidence Collected
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    ☐ Analyze Files
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    ☐ Extract IOCs
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    ☐ Write Report
-                  </div>
-
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-line p-4">
-
-                <h3 className="font-semibold mb-3">
-                  Recent Activity
-                </h3>
-
-                <div className="space-y-2 text-sm text-fog">
-
-                  <div>• Added memory.dmp</div>
-
-                  <div>• Created investigation notes</div>
-
-                  <div>• Imported PCAP</div>
-
-                  <div>• Generated SHA256 hashes</div>
-
-                </div>
-
-              </div>
-
-              <div className="rounded-lg border border-line p-4">
-
-                <h3 className="font-semibold mb-3">
-                  Quick Actions
-                </h3>
-
-                <div className="space-y-2">
-
-                  <button className="w-full rounded border border-line p-2 hover:bg-line">
-                    Upload Evidence
-                  </button>
-
-                  <button className="w-full rounded border border-line p-2 hover:bg-line">
-                    Open Notes
-                  </button>
-
-                  <button className="w-full rounded border border-line p-2 hover:bg-line">
-                    Run Smart Analyzer
-                  </button>
-
-                  <button className="w-full rounded border border-line p-2 hover:bg-line">
-                    Export Case
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-          </>
+        {!activeCase ? (
+          <div className="h-full flex items-center justify-center text-fog">
+            Create an investigation to begin.
+          </div>
         ) : (
-          <div className="flex h-full items-center justify-center text-fog">
-            No case selected.
+          <div className="space-y-6">
+
+            <div>
+
+              <Input
+                value={activeCase.title}
+                onChange={(e) =>
+                  updateCase({
+                    title: e.target.value,
+                  })
+                }
+                className="text-xl font-bold"
+              />
+
+              <Textarea
+                value={activeCase.description}
+                onChange={(e) =>
+                  updateCase({
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Investigation description..."
+                className="mt-3"
+              />
+
+            </div>
+
+            {/* Evidence */}
+
+            <div>
+
+              <h2 className="font-semibold mb-2">
+                Evidence
+              </h2>
+
+              <div className="flex gap-2">
+
+                <Input
+                  value={newEvidence}
+                  placeholder="memory.dmp"
+                  onChange={(e) =>
+                    setNewEvidence(e.target.value)
+                  }
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && addEvidence()
+                  }
+                />
+
+                <Button onClick={addEvidence}>
+                  <FilePlus2 size={14}/>
+                </Button>
+
+              </div>
+
+              <div className="mt-3 space-y-2">
+
+                {activeCase.evidence.map((file, i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between items-center border border-line rounded p-2"
+                  >
+                    <span>{file}</span>
+
+                    <button
+                      onClick={() =>
+                        removeEvidence(i)
+                      }
+                    >
+                      <Trash2
+                        size={14}
+                        className="text-red-400"
+                      />
+                    </button>
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+            {/* Tasks */}
+
+            <div>
+
+              <h2 className="font-semibold mb-2">
+                Investigation Checklist
+              </h2>
+
+              <div className="flex gap-2">
+
+                <Input
+                  value={newTask}
+                  placeholder="Analyze PCAP"
+                  onChange={(e) =>
+                    setNewTask(e.target.value)
+                  }
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && addTask()
+                  }
+                />
+
+                <Button onClick={addTask}>
+                  <Plus size={14}/>
+                </Button>
+
+              </div>
+
+              <div className="mt-3 space-y-2">
+
+                {activeCase.tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between border border-line rounded p-2"
+                  >
+
+                    <div
+                      className="flex items-center gap-3 cursor-pointer"
+                      onClick={() =>
+                        toggleTask(task.id)
+                      }
+                    >
+                      <CheckSquare
+                        size={18}
+                        className={
+                          task.done
+                            ? "text-green-500"
+                            : ""
+                        }
+                      />
+
+                      <span
+                        className={
+                          task.done
+                            ? "line-through text-fog"
+                            : ""
+                        }
+                      >
+                        {task.text}
+                      </span>
+
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        deleteTask(task.id)
+                      }
+                    >
+                      <Trash2
+                        size={14}
+                        className="text-red-400"
+                      />
+                    </button>
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
           </div>
         )}
 
-      </div>
+      </Card>
 
     </div>
   );
