@@ -2,6 +2,8 @@
 
 ### An All-in-One Cybersecurity Toolkit for CTF Competitors
 
+https://bwsi-bril1ant-be4vers.github.io/br1lliantT0ols.github.io/
+
 **Br1lliantT0ols** is a flexible, easy-to-navigate, all-in-one cybersecurity toolkit designed for **Capture The Flag (CTF) competitors of all skill levels**. Built by **Br1lliant Be4vers** for the **MIT Beaver Works Summer Institute (BWSI) Cyber Operations Hackathon 2026**, the platform brings together a collection of useful cybersecurity tools into one centralized web application.
 
 Whether you're a **beginner learning the fundamentals**, an **intermediate competitor solving CTF challenges**, or an **advanced cybersecurity enthusiast** looking for a convenient toolkit, Br1lliantT0ols is designed to make common cybersecurity tasks more accessible, efficient, and easier to understand.
