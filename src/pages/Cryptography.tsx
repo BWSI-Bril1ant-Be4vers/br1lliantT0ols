@@ -1,5 +1,4 @@
-tsx
-import { useState, useMemo, type ChangeEvent } from 'react';
+import { useState, useMemo, useEffect, type ChangeEvent } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardSubtitle, CardContent } from '../components/ui/Card';
 import { Textarea, Input } from '../components/ui/Input';
@@ -116,7 +115,7 @@ export function Cryptography() {
   const [input, setInput] = useState<string>('Wkh iodj lv fdhvdu_lv_hdvb_420');
   const [key, setKey] = useState<string>('shadow');
   const [decode, setDecode] = useState<boolean>(true);
-  const [output, setOutput] = useState<string>('the flag is caesar_is_easy_420');
+  const [output, setOutput] = useState<string>('');
   const [history, setHistory] = useState<HistoryEntry[]>([
     { op: 'Vigenère decode (key: shadow)', time: 'just now' },
     { op: 'Base64 decode', time: '6m ago' },
@@ -125,8 +124,13 @@ export function Cryptography() {
 
   const freqData = useMemo(() => computeFreq(input), [input]);
 
+  // Recalculate output whenever controls or inputs change
+  useEffect(() => {
+    const result = runCipher(algo, input, key, decode);
+    setOutput(result);
+  }, [algo, input, key, decode]);
+
   function handleRun() {
-    console.log('handleRun fired', algo, input, key);
     const result = runCipher(algo, input, key, decode);
     setOutput(result);
 
@@ -193,7 +197,7 @@ export function Cryptography() {
           </CardHeader>
           <CardContent>
             <pre className="text-xs font-mono text-mint leading-relaxed whitespace-pre-wrap">
-{output}
+              {output}
             </pre>
           </CardContent>
         </Card>
