@@ -11,8 +11,6 @@ import { WebExploitation } from "./pages/WebExploitation";
 import { Workspace } from "./pages/Workspace";
 import { Notes } from "./pages/Notes";
 
-import { StubPage } from "./components/StubPage";
-
 import {
   Settings,
 } from "lucide-react";
