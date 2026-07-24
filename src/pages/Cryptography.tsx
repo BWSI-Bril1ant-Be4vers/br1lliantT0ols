@@ -1,26 +1,36 @@
-Sure — here's the full component:
-
-jsx
-import { useState, useMemo } from 'react';
+tsx
+import { useState, useMemo, type ChangeEvent } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardSubtitle, CardContent } from '../components/ui/Card';
-import { Textarea } from '../components/ui/Input';
+import { Textarea, Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { History } from 'lucide-react';
 
-const algorithms = ['Caesar', 'Vigenère', 'XOR', 'Base64', 'ROT13', 'RSA (small n)'];
+const algorithms = ['Caesar', 'Vigenère', 'XOR', 'Base64', 'ROT13', 'RSA (small n)'] as const;
+type Algo = (typeof algorithms)[number];
+
+interface HistoryEntry {
+  op: string;
+  time: string;
+}
+
+interface FreqPoint {
+  letter: string;
+  freq: number;
+  baseline: number;
+}
 
 // ---------- Cipher implementations ----------
 
-function caesarShift(text, shift) {
+function caesarShift(text: string, shift: number): string {
   return text.replace(/[a-zA-Z]/g, (ch) => {
     const base = ch <= 'Z' ? 65 : 97;
     return String.fromCharCode(((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26 + base);
   });
 }
 
-function vigenere(text, key, decode) {
+function vigenere(text: string, key: string, decode: boolean): string {
   if (!key) return text;
   const k = key.replace(/[^a-zA-Z]/g, '');
   if (!k) return text;
@@ -35,7 +45,7 @@ function vigenere(text, key, decode) {
   });
 }
 
-function xorCipher(text, key) {
+function xorCipher(text: string, key: string): string {
   if (!key) return text;
   let out = '';
   for (let i = 0; i < text.length; i++) {
@@ -44,7 +54,7 @@ function xorCipher(text, key) {
   return out;
 }
 
-function base64(text, decode) {
+function base64(text: string, decode: boolean): string {
   try {
     return decode ? atob(text) : btoa(text);
   } catch {
@@ -52,11 +62,11 @@ function base64(text, decode) {
   }
 }
 
-function rot13(text) {
+function rot13(text: string): string {
   return caesarShift(text, 13);
 }
 
-function runCipher(algo, input, key, decode) {
+function runCipher(algo: Algo, input: string, key: string, decode: boolean): string {
   switch (algo) {
     case 'Caesar': {
       const shift = parseInt(key, 10);
@@ -79,14 +89,14 @@ function runCipher(algo, input, key, decode) {
 }
 
 // English letter frequency baseline (%) for comparison
-const ENGLISH_FREQ = {
+const ENGLISH_FREQ: Record<string, number> = {
   a: 8.2, b: 1.5, c: 2.8, d: 4.3, e: 12.7, f: 2.2, g: 2.0, h: 6.1, i: 7.0,
   j: 0.2, k: 0.8, l: 4.0, m: 2.4, n: 6.7, o: 7.5, p: 1.9, q: 0.1, r: 6.0,
   s: 6.3, t: 9.1, u: 2.8, v: 1.0, w: 2.4, x: 0.2, y: 2.0, z: 0.1,
 };
 
-function computeFreq(text) {
-  const counts = {};
+function computeFreq(text: string): FreqPoint[] {
+  const counts: Record<string, number> = {};
   let total = 0;
   for (const ch of text.toLowerCase()) {
     if (ch >= 'a' && ch <= 'z') {
@@ -96,18 +106,18 @@ function computeFreq(text) {
   }
   return Object.keys(ENGLISH_FREQ).map((letter) => ({
     letter,
-    freq: total ? +((counts[letter] || 0) / total * 100).toFixed(1) : 0,
+    freq: total ? +(((counts[letter] || 0) / total) * 100).toFixed(1) : 0,
     baseline: ENGLISH_FREQ[letter],
   }));
 }
 
 export function Cryptography() {
-  const [algo, setAlgo] = useState('Vigenère');
-  const [input, setInput] = useState('Wkh iodj lv fdhvdu_lv_hdvb_420');
-  const [key, setKey] = useState('shadow');
-  const [decode, setDecode] = useState(true);
-  const [output, setOutput] = useState('the flag is caesar_is_easy_420');
-  const [history, setHistory] = useState([
+  const [algo, setAlgo] = useState<Algo>('Vigenère');
+  const [input, setInput] = useState<string>('Wkh iodj lv fdhvdu_lv_hdvb_420');
+  const [key, setKey] = useState<string>('shadow');
+  const [decode, setDecode] = useState<boolean>(true);
+  const [output, setOutput] = useState<string>('the flag is caesar_is_easy_420');
+  const [history, setHistory] = useState<HistoryEntry[]>([
     { op: 'Vigenère decode (key: shadow)', time: 'just now' },
     { op: 'Base64 decode', time: '6m ago' },
     { op: 'XOR brute-force, key len 3', time: '14m ago' },
@@ -124,6 +134,7 @@ export function Cryptography() {
   }
 
   const needsKey = algo === 'Vigenère' || algo === 'XOR' || algo === 'Caesar';
+  const hasDirection = algo === 'Caesar' || algo === 'Vigenère' || algo === 'Base64';
 
   return (
     <div className="p-6 grid grid-cols-3 gap-4 max-w-[1400px]">
@@ -149,19 +160,19 @@ export function Cryptography() {
             <Textarea
               rows={4}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
               className="text-xs"
             />
             <div className="flex items-center gap-2 mt-3">
               {needsKey && (
-                <input
+                <Input
                   placeholder={algo === 'Caesar' ? 'Shift (e.g. 3)' : 'Key (optional)'}
                   value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  className="h-8 flex-1 rounded-lg border border-line bg-surface-raised px-3 text-xs font-mono outline-none focus:border-signal"
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setKey(e.target.value)}
+                  className="h-8 flex-1 text-xs font-mono"
                 />
               )}
-              {(algo === 'Caesar' || algo === 'Vigenère' || algo === 'Base64') && (
+              {hasDirection && (
                 <button
                   onClick={() => setDecode((d) => !d)}
                   className="h-8 px-2.5 rounded-lg border border-line text-[11px] font-mono text-fog hover:text-paper"
