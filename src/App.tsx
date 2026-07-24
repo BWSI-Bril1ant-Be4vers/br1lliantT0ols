@@ -43,7 +43,7 @@ export default function App() {
           {active === 'web' && <WebExploitation />}
           {active === 'reveng' && <ReverseEngineering />}
           {active === 'plugins' && <Plugins />}
-          {active === 'notes' && <Notes />}
+          {active === 'nots' && <Notes />}
           {active === 'workspace' && (
             <StubPage icon={FolderKanban} title="No active workspace" description="Start an analysis from the Smart Analyzer, or open a saved case to see notes, evidence, and the artifact graph here." />
           )}
