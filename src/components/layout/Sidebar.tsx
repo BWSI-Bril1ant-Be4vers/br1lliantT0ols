@@ -3,8 +3,14 @@ import {
   FolderKanban,
   Sparkles,
   Globe,
+  Cpu,
   KeyRound,
+  Fingerprint,
+  Network,
+  Wrench,
+  Bot,
   StickyNote,
+  Blocks,
   Settings,
   Terminal,
 } from "lucide-react";
@@ -19,13 +25,20 @@ export type ModuleId =
   | "web"
   | "crypto"
   | "notes"
-  | "settings";
+  | "settings"
+  | "reveng"
+  | "forensics"
+  | "networking"
+  | "utilities"
+  | "ai"
+  | "plugins";
 
 
 const items: {
   id: ModuleId;
   label: string;
   icon: typeof LayoutGrid;
+  disabled?: boolean;
 }[] = [
 
   {
@@ -58,6 +71,52 @@ const items: {
     icon: KeyRound,
   },
 
+
+  // Coming soon modules
+
+  {
+    id: "reveng",
+    label: "Reverse Engineering (Coming Soon)",
+    icon: Cpu,
+    disabled: true,
+  },
+
+  {
+    id: "forensics",
+    label: "Forensics (Coming Soon)",
+    icon: Fingerprint,
+    disabled: true,
+  },
+
+  {
+    id: "networking",
+    label: "Networking (Coming Soon)",
+    icon: Network,
+    disabled: true,
+  },
+
+  {
+    id: "utilities",
+    label: "Utilities (Coming Soon)",
+    icon: Wrench,
+    disabled: true,
+  },
+
+  {
+    id: "ai",
+    label: "AI Assistant (Coming Soon)",
+    icon: Bot,
+    disabled: true,
+  },
+
+  {
+    id: "plugins",
+    label: "Plugins (Coming Soon)",
+    icon: Blocks,
+    disabled: true,
+  },
+
+
   {
     id: "notes",
     label: "Notes",
@@ -86,6 +145,7 @@ export function Sidebar({
 
     <aside className="w-60 shrink-0 h-screen sticky top-0 border-r border-line bg-surface/60 flex flex-col">
 
+
       <div className="h-14 flex items-center gap-2 px-4 border-b border-line-soft">
 
         <div className="w-7 h-7 rounded-lg bg-signal/15 border border-signal-dim flex items-center justify-center">
@@ -97,8 +157,7 @@ export function Sidebar({
 
         </div>
 
-
-        <span className="font-semibold text-[13px] tracking-tight">
+        <span className="font-semibold text-[13px]">
           Br1lliant T0ols
         </span>
 
@@ -106,20 +165,40 @@ export function Sidebar({
 
 
 
-      <nav className="flex-1 overflow-y-auto scrollbar-thin py-3 px-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
 
-        {items.map(({ id, label, icon: Icon }) => (
+        {items.map(
+          ({
+            id,
+            label,
+            icon: Icon,
+            disabled,
+          }) => (
 
           <button
+
             key={id}
-            onClick={() => onSelect(id)}
+
+            disabled={disabled}
+
+            onClick={() => {
+              if (!disabled) {
+                onSelect(id);
+              }
+            }}
+
             className={cn(
+
               "w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
 
-              active === id
-                ? "bg-signal/12 text-signal border border-signal-dim/60"
-                : "text-fog hover:text-paper hover:bg-surface-hover border border-transparent"
+              disabled
+                ? "text-fog-dim opacity-50 cursor-not-allowed"
+                : active === id
+                  ? "bg-signal/12 text-signal border border-signal-dim/60"
+                  : "text-fog hover:text-paper hover:bg-surface-hover border border-transparent"
+
             )}
+
           >
 
             <Icon
@@ -127,7 +206,10 @@ export function Sidebar({
               strokeWidth={2}
             />
 
-            {label}
+            <span className="truncate">
+              {label}
+            </span>
+
 
           </button>
 
@@ -139,20 +221,18 @@ export function Sidebar({
 
       <div className="p-3 border-t border-line-soft">
 
-        <div className="flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-surface-hover cursor-pointer">
+        <div className="flex items-center gap-2 rounded-lg px-2 py-2">
 
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-signal to-cyan flex items-center justify-center text-[11px] font-semibold text-ink">
             JD
           </div>
 
-
-          <div className="min-w-0">
-
-            <p className="text-xs font-medium truncate">
+          <div>
+            <p className="text-xs font-medium">
               j.doe
             </p>
 
-            <p className="text-[11px] text-fog-dim truncate">
+            <p className="text-[11px] text-fog-dim">
               Team Nullbyte
             </p>
 
