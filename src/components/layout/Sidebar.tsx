@@ -25,13 +25,7 @@ export type ModuleId =
   | "web"
   | "crypto"
   | "notes"
-  | "settings"
-  | "reveng"
-  | "forensics"
-  | "networking"
-  | "utilities"
-  | "ai"
-  | "plugins";
+  | "settings";
 
 
 const items: {
