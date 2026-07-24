@@ -223,14 +223,18 @@ export function Notes() {
             <div className="flex items-center gap-2 flex-wrap text-xs">
               <Tag size={13} className="text-fog" />
               {activeNote.tags.map((tag) => (
-                <Badge
+                <span
                   key={tag}
-                  tone="mint"
-                  className="cursor-pointer font-mono text-[10px] hover:line-through"
                   onClick={() => handleRemoveTag(tag)}
+                  className="cursor-pointer"
                 >
-                  #{tag}
-                </Badge>
+                  <Badge
+                    tone="mint"
+                    className="font-mono text-[10px] hover:line-through"
+                  >
+                    #{tag}
+                  </Badge>
+                </span>
               ))}
               <input
                 type="text"
