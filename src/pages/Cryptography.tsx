@@ -117,7 +117,7 @@ export function Cryptography() {
   const [decode, setDecode] = useState<boolean>(true);
   const [output, setOutput] = useState<string>('');
   const [history, setHistory] = useState<HistoryEntry[]>([
-    { op: 'Vigenère decode (key: shadow)', time: 'just now' },
+    { op: 'Vigenère decode (key: shadoodoo)', time: 'just now' },
     { op: 'Base64 decode', time: '6m ago' },
     { op: 'XOR brute-force, key len 3', time: '14m ago' },
   ]);
