@@ -76,42 +76,42 @@ const items: {
 
   {
     id: "reveng",
-    label: "Reverse Engineering (Coming Soon)",
+    label: "Coming Soon",
     icon: Cpu,
     disabled: true,
   },
 
   {
     id: "forensics",
-    label: "Forensics (Coming Soon)",
+    label: "Coming Soon",
     icon: Fingerprint,
     disabled: true,
   },
 
   {
     id: "networking",
-    label: "Networking (Coming Soon)",
+    label: "Coming Soon",
     icon: Network,
     disabled: true,
   },
 
   {
     id: "utilities",
-    label: "Utilities (Coming Soon)",
+    label: "Coming Soon",
     icon: Wrench,
     disabled: true,
   },
 
   {
     id: "ai",
-    label: "AI Assistant (Coming Soon)",
+    label: "Coming Soon",
     icon: Bot,
     disabled: true,
   },
 
   {
     id: "plugins",
-    label: "Plugins (Coming Soon)",
+    label: "Coming Soon",
     icon: Blocks,
     disabled: true,
   },
