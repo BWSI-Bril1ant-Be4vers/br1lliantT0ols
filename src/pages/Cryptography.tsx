@@ -126,6 +126,7 @@ export function Cryptography() {
   const freqData = useMemo(() => computeFreq(input), [input]);
 
   function handleRun() {
+    console.log('handleRun fired', algo, input, key);
     const result = runCipher(algo, input, key, decode);
     setOutput(result);
 
