@@ -1,22 +1,129 @@
-import { useState } from 'react';
+Sure — here's the full component:
+
+jsx
+import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardHeader, CardTitle, CardSubtitle, CardContent } from '../components/ui/Card';
 import { Textarea } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { freqAnalysis } from '../data/mock';
 import { History } from 'lucide-react';
 
 const algorithms = ['Caesar', 'Vigenère', 'XOR', 'Base64', 'ROT13', 'RSA (small n)'];
 
-const history = [
-  { op: 'Vigenère decode (key: shadow)', time: '2m ago' },
-  { op: 'Base64 decode', time: '6m ago' },
-  { op: 'XOR brute-force, key len 3', time: '14m ago' },
-];
+// ---------- Cipher implementations ----------
+
+function caesarShift(text, shift) {
+  return text.replace(/[a-zA-Z]/g, (ch) => {
+    const base = ch <= 'Z' ? 65 : 97;
+    return String.fromCharCode(((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26 + base);
+  });
+}
+
+function vigenere(text, key, decode) {
+  if (!key) return text;
+  const k = key.replace(/[^a-zA-Z]/g, '');
+  if (!k) return text;
+  let ki = 0;
+  return text.replace(/[a-zA-Z]/g, (ch) => {
+    const base = ch <= 'Z' ? 65 : 97;
+    const kch = k[ki % k.length].toLowerCase();
+    const kshift = kch.charCodeAt(0) - 97;
+    ki++;
+    const shift = decode ? -kshift : kshift;
+    return String.fromCharCode(((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26 + base);
+  });
+}
+
+function xorCipher(text, key) {
+  if (!key) return text;
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    out += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return out;
+}
+
+function base64(text, decode) {
+  try {
+    return decode ? atob(text) : btoa(text);
+  } catch {
+    return '[invalid base64 input]';
+  }
+}
+
+function rot13(text) {
+  return caesarShift(text, 13);
+}
+
+function runCipher(algo, input, key, decode) {
+  switch (algo) {
+    case 'Caesar': {
+      const shift = parseInt(key, 10);
+      const s = Number.isFinite(shift) ? shift : 3;
+      return caesarShift(input, decode ? -s : s);
+    }
+    case 'Vigenère':
+      return vigenere(input, key, decode);
+    case 'XOR':
+      return xorCipher(input, key);
+    case 'Base64':
+      return base64(input, decode);
+    case 'ROT13':
+      return rot13(input);
+    case 'RSA (small n)':
+      return '[RSA needs a private key/factorization step — see panel]';
+    default:
+      return input;
+  }
+}
+
+// English letter frequency baseline (%) for comparison
+const ENGLISH_FREQ = {
+  a: 8.2, b: 1.5, c: 2.8, d: 4.3, e: 12.7, f: 2.2, g: 2.0, h: 6.1, i: 7.0,
+  j: 0.2, k: 0.8, l: 4.0, m: 2.4, n: 6.7, o: 7.5, p: 1.9, q: 0.1, r: 6.0,
+  s: 6.3, t: 9.1, u: 2.8, v: 1.0, w: 2.4, x: 0.2, y: 2.0, z: 0.1,
+};
+
+function computeFreq(text) {
+  const counts = {};
+  let total = 0;
+  for (const ch of text.toLowerCase()) {
+    if (ch >= 'a' && ch <= 'z') {
+      counts[ch] = (counts[ch] || 0) + 1;
+      total++;
+    }
+  }
+  return Object.keys(ENGLISH_FREQ).map((letter) => ({
+    letter,
+    freq: total ? +((counts[letter] || 0) / total * 100).toFixed(1) : 0,
+    baseline: ENGLISH_FREQ[letter],
+  }));
+}
 
 export function Cryptography() {
   const [algo, setAlgo] = useState('Vigenère');
+  const [input, setInput] = useState('Wkh iodj lv fdhvdu_lv_hdvb_420');
+  const [key, setKey] = useState('shadow');
+  const [decode, setDecode] = useState(true);
+  const [output, setOutput] = useState('the flag is caesar_is_easy_420');
+  const [history, setHistory] = useState([
+    { op: 'Vigenère decode (key: shadow)', time: 'just now' },
+    { op: 'Base64 decode', time: '6m ago' },
+    { op: 'XOR brute-force, key len 3', time: '14m ago' },
+  ]);
+
+  const freqData = useMemo(() => computeFreq(input), [input]);
+
+  function handleRun() {
+    const result = runCipher(algo, input, key, decode);
+    setOutput(result);
+
+    const label = `${algo} ${decode ? 'decode' : 'encode'}${key ? ` (key: ${key})` : ''}`;
+    setHistory((h) => [{ op: label, time: 'just now' }, ...h].slice(0, 8));
+  }
+
+  const needsKey = algo === 'Vigenère' || algo === 'XOR' || algo === 'Caesar';
 
   return (
     <div className="p-6 grid grid-cols-3 gap-4 max-w-[1400px]">
@@ -41,16 +148,28 @@ export function Cryptography() {
           <CardContent>
             <Textarea
               rows={4}
-              defaultValue="Wkh iodj lv fdhvdu_lv_hdvb_420"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               className="text-xs"
             />
             <div className="flex items-center gap-2 mt-3">
-              <input
-                placeholder="Key (optional)"
-                className="h-8 flex-1 rounded-lg border border-line bg-surface-raised px-3 text-xs font-mono outline-none focus:border-signal"
-                defaultValue="shadow"
-              />
-              <Button variant="primary" size="sm">Run {algo}</Button>
+              {needsKey && (
+                <input
+                  placeholder={algo === 'Caesar' ? 'Shift (e.g. 3)' : 'Key (optional)'}
+                  value={key}
+                  onChange={(e) => setKey(e.target.value)}
+                  className="h-8 flex-1 rounded-lg border border-line bg-surface-raised px-3 text-xs font-mono outline-none focus:border-signal"
+                />
+              )}
+              {(algo === 'Caesar' || algo === 'Vigenère' || algo === 'Base64') && (
+                <button
+                  onClick={() => setDecode((d) => !d)}
+                  className="h-8 px-2.5 rounded-lg border border-line text-[11px] font-mono text-fog hover:text-paper"
+                >
+                  {decode ? 'Decode' : 'Encode'}
+                </button>
+              )}
+              <Button variant="primary" size="sm" onClick={handleRun}>Run {algo}</Button>
             </div>
           </CardContent>
         </Card>
@@ -58,11 +177,11 @@ export function Cryptography() {
         <Card>
           <CardHeader>
             <CardTitle>Output</CardTitle>
-            <Badge tone="mint">decoded</Badge>
+            <Badge tone="mint">{decode ? 'decoded' : 'encoded'}</Badge>
           </CardHeader>
           <CardContent>
             <pre className="text-xs font-mono text-mint leading-relaxed whitespace-pre-wrap">
-{`the flag is caesar_is_easy_420`}
+{output}
             </pre>
           </CardContent>
         </Card>
@@ -75,7 +194,7 @@ export function Cryptography() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={140}>
-                <BarChart data={freqAnalysis} margin={{ left: -25 }}>
+                <BarChart data={freqData} margin={{ left: -25 }}>
                   <XAxis dataKey="letter" tick={{ fill: '#8890a2', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: '#171b23', border: '1px solid #232733', borderRadius: 8, fontSize: 11 }} />
                   <Bar dataKey="freq" fill="#5b8def" radius={[3, 3, 0, 0]} />
@@ -99,7 +218,9 @@ export function Cryptography() {
                   />
                 ))}
               </div>
-              <p className="text-[11px] text-fog-dim mt-2 font-mono">key = 0x5A · repeating, length 1</p>
+              <p className="text-[11px] text-fog-dim mt-2 font-mono">
+                {algo === 'XOR' && key ? `key = "${key}" · repeating, length ${key.length}` : 'key = 0x5A · repeating, length 1'}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -114,8 +235,8 @@ export function Cryptography() {
             </div>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            {history.map((h) => (
-              <div key={h.op} className="flex items-center justify-between text-[12px]">
+            {history.map((h, i) => (
+              <div key={`${h.op}-${i}`} className="flex items-center justify-between text-[12px]">
                 <span className="text-paper">{h.op}</span>
                 <span className="text-fog-dim shrink-0 ml-2">{h.time}</span>
               </div>
