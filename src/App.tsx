@@ -11,9 +11,14 @@ import { WebExploitation } from "./pages/WebExploitation";
 import { Workspace } from "./pages/Workspace";
 import { Notes } from "./pages/Notes";
 import { StubPage } from "./pages/StubPage";
-
 import {
   Settings,
+  Shield,
+  Wrench,
+  Cpu,
+  Plug,
+  Network,
+  Bot,
 } from "lucide-react";
 
 
@@ -63,6 +68,27 @@ export default function App() {
 
       case "workspace":
         return <Workspace />;
+
+
+      case "forensics":
+        return <StubPage icon={Shield} title="Forensics" />;
+        
+      case "utilities":
+        return <StubPage icon={Wrench} title="Utilities" />;
+        
+      case "reveng":
+        return <StubPage icon={Cpu} title="Reverse Engineering" />;
+        
+      case "plugins":
+        return <StubPage icon={Plug} title="Plugins" />;
+      case "networking":
+        return <StubPage icon={Network} title="Networking" />;
+        
+      case "ai":
+        return <StubPage icon={Bot} title="AI Assistant" />;
+        
+      case "settings":
+        return <StubPage icon={Settings} title="Settings" />;
 
 
       case "notes":
