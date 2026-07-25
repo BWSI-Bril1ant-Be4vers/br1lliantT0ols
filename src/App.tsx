@@ -10,6 +10,7 @@ import { Cryptography } from "./pages/Cryptography";
 import { WebExploitation } from "./pages/WebExploitation";
 import { Workspace } from "./pages/Workspace";
 import { Notes } from "./pages/Notes";
+import { StubPage } from "./pages/StubPage";
 
 import {
   Settings,
