@@ -7,6 +7,13 @@ import {
   StickyNote,
   Settings,
   Terminal,
+  Shield,
+  Wrench,
+  Cpu,
+  Plug,
+  Network,
+  Bot,
+  type LucideIcon,
 } from "lucide-react";
 
 import { cn } from "../../lib/cn";
@@ -17,49 +24,33 @@ export type ModuleId =
   | "analyzer"
   | "web"
   | "crypto"
+  | "forensics"
+  | "utilities"
+  | "reveng"
+  | "plugins"
+  | "networking"
+  | "ai"
   | "notes"
   | "settings";
 
 const items: {
   id: ModuleId;
   label: string;
-  icon: typeof LayoutGrid;
+  icon: LucideIcon;
 }[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: LayoutGrid,
-  },
-  {
-    id: "workspace",
-    label: "Workspace",
-    icon: FolderKanban,
-  },
-  {
-    id: "analyzer",
-    label: "Smart Analyzer",
-    icon: Sparkles,
-  },
-  {
-    id: "web",
-    label: "Web Exploitation",
-    icon: Globe,
-  },
-  {
-    id: "crypto",
-    label: "Cryptography",
-    icon: KeyRound,
-  },
-  {
-    id: "notes",
-    label: "Notes",
-    icon: StickyNote,
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-  },
+  { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
+  { id: "workspace", label: "Workspace", icon: FolderKanban },
+  { id: "analyzer", label: "Smart Analyzer", icon: Sparkles },
+  { id: "web", label: "Web Exploitation", icon: Globe },
+  { id: "crypto", label: "Cryptography", icon: KeyRound },
+  { id: "forensics", label: "Forensics", icon: Shield },
+  { id: "utilities", label: "Utilities", icon: Wrench },
+  { id: "reveng", label: "Reverse Engineering", icon: Cpu },
+  { id: "plugins", label: "Plugins", icon: Plug },
+  { id: "networking", label: "Networking", icon: Network },
+  { id: "ai", label: "AI Assistant", icon: Bot },
+  { id: "notes", label: "Notes", icon: StickyNote },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({
