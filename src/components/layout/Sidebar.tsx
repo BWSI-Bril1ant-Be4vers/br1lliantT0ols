@@ -4,6 +4,9 @@ import {
   Sparkles,
   Globe,
   KeyRound,
+  Cpu,
+  StickyNote,
+  Settings,
 } from "lucide-react";
 
 import { cn } from "../../lib/cn";
@@ -69,35 +72,35 @@ const items: {
   {
     id: "forensics",
     label: "Coming Soon",
-    icon: Fingerprint,
+    icon: Cpu,
     disabled: true,
   },
 
   {
     id: "networking",
     label: "Coming Soon",
-    icon: Network,
+    icon: Cpu,
     disabled: true,
   },
 
   {
     id: "utilities",
     label: "Coming Soon",
-    icon: Wrench,
+    icon: Cpu,
     disabled: true,
   },
 
   {
     id: "ai",
     label: "Coming Soon",
-    icon: Bot,
+    icon: Cpu,
     disabled: true,
   },
 
   {
     id: "plugins",
     label: "Coming Soon",
-    icon: Blocks,
+    icon: Cpu,
     disabled: true,
   },
 
