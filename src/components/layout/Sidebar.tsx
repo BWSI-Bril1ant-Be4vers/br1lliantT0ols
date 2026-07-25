@@ -3,16 +3,7 @@ import {
   FolderKanban,
   Sparkles,
   Globe,
-  Cpu,
   KeyRound,
-  Fingerprint,
-  Network,
-  Wrench,
-  Bot,
-  StickyNote,
-  Blocks,
-  Settings,
-  Terminal,
 } from "lucide-react";
 
 import { cn } from "../../lib/cn";
